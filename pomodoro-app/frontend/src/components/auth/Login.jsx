@@ -28,13 +28,23 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
+      console.log('Attempting login with:', formData);
       const response = await api.post('/auth/login', formData);
-      onLogin(response.data.user);
-      navigate('/');  // Redirect to home after login
+      console.log('Login response:', response.data);
+      
+      if (response.data.user) {
+        onLogin(response.data.user);
+        navigate('/');  // Redirect to home after login
+      } else {
+        setError('Login response missing user data');
+      }
     } catch (error) {
-      if (error.message.includes('401')) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
+      
+      if (error.response?.status === 401) {
         setError('Invalid username or password');
-      } else if (error.message.includes('404')) {
+      } else if (error.response?.status === 404) {
         setError('User not found');
       } else {
         setError(error.message || 'Login failed. Please try again.');
